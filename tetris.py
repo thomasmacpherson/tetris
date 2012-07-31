@@ -6,8 +6,6 @@ bg_image = "background.png"
 
 
 
-
-
 import pygame, time, sys, threading, random
 import piface.pfio as pfio
 
@@ -30,11 +28,16 @@ class Block(object):
 
 
 
+
+
+shape_index = [[[0,32,64,],[],[],[]],[[],[],[],[]],[[],[],[],[]],[[],[],[],[]],[[],[],[],[]],[[],[],[],[]],[[],[],[],[]]]
+
+
 class Shape(object):
 	def __init__(self, x, y, shape):
 		self.x = x
 		self.y = y
-		self.rot = 1
+		self.rot = 0
 
 		if shape == 1:
 			self.blocks = [
@@ -115,8 +118,13 @@ class Shape(object):
 			dead_block_list.append(block)
 		check_lines()
 		del(self)
-		
+	
+	def rotate(self):
+		self.rot +=1
+		if self.rot > 3:
+			self.rot = 0
 
+		if self.shape == 1:
 
 
 def new_shape():
@@ -218,7 +226,7 @@ while running == True:
 				active_block.move(-32,0)
 
 			elif event.key == K_UP:
-				pass
+				active_block.rotate()
 
 			elif event.key == K_DOWN:
 				if active_block.y < 594:
