@@ -1,6 +1,6 @@
 #tetris
 
-
+from shapes import *
 bg_image = "background.png"
 
 
@@ -24,64 +24,6 @@ class Block(object):
 		"""draws the block"""
 		
 		screen.blit(block_colours[self.colour],(self.x,self.y))
-
-
-
-
-
-               
-shape_index = [  
-	       [       
-	          [ [0,32,64,32],[-32,-32,-32,0] ],
-	          [ [32,32,64,32],[-64,-32,-32,0] ],
-	          [ [32,0,32,64],[-32,0,0,0] ],
-	          [ [64,32,64,64],[-64,-32,-32,0] ]
-	        ],
-	        
-	       [
-	       	  [ [0,0,32,32],[0,-32,32,0] ],
-	       	  [ [0,0,32,32],[0,-32,32,0] ],
-	       	  [ [0,0,32,32],[0,-32,32,0] ],
-	       	  [ [0,0,32,32],[0,-32,32,0] ],
-	       ],
-	        
-	       [
-	       	  [ [0,32,64,0],[-32,-32,-32,0] ],
-	       	  [ [32,32,32,64],[-64,-32,0,0] ],
-	       	  [ [64,0,32,64],[-32,0,0,0] ],
-	       	  [ [0,32,32,32],[-64,-64,-32,0] ]
-	       ],
-	       
-	       [
-	       	  [ [0,32,64,64],[-32,-32,-32,0] ],
-	       	  [ [32,64,32,32],[-64,-64,-32,0] ],
-	       	  [ [0,0,32,64],[-32,0,0,0] ],
-	       	  [ [32,32,0,32],[-64,-32,0,0] ]
-	       ],
-	       
-	       [
-	       	  [ [0,32,32,64],[-32,-32,0,0] ],
-	       	  [ [32,0,32,0],[-64,-32,-32,0] ],
-	       	  [ [0,32,32,64],[-32,-32,0,0] ],
-	       	  [ [32,0,32,0],[-64,-32,-32,0] ] 
-	       ],
-
-	       [
-	       	  [ [0,32,64,96],[0,0,0,0] ],
-	       	  [ [32,32,32,32],[-96,-64,-32,0] ],
-	       	  [ [0,32,64,96],[0,0,0,0] ],
-	       	  [ [32,32,32,32],[-96,-64,-32,0] ] 
-	       ],
-	       
-	       [
-	       	  [ [32,64,0,32],[-32,-32,0,0] ],
-	       	  [ [0,0,32,32],[-64,-32,-32,0] ],
-	       	  [ [32,64,0,32],[-32,-32,0,0] ],
-	       	  [ [0,0,32,32],[-64,-32,-32,0] ]
-	       ]
-	     ]
-
-
 class Shape(object):
 	global shape_index
 	def __init__(self, x, y, shape):
@@ -151,6 +93,10 @@ class Shape(object):
 
 
 
+
+
+
+
 def new_shape():
 	global active_block
 	global next_shape
@@ -178,19 +124,20 @@ def check_lines():
 	check_list = list()
 
 	for block in dead_block_list[-4:]: # check last 4 blocks of list
-		if block.y not in clear_list:
-			clear_list.append(block.y)
+		if block.y not in check_list:
+			check_list.append(block.y)
 
-	for y in clear_list:
-		check_line((y - 594)/32)
+	for y in check_list:
+		check_line((y - 82)/32)
 
 
 
 def check_line(line_number):
+	print line_number
 	global dead_block_list
 	if y_count[line_number] > 9:
 		for block in dead_block_list:
-			if block.y == (line_number * 32)+594:
+			if block.y == (line_number * 32)+82:
 				dead_block_list.remove(block)
 				
 
@@ -214,12 +161,12 @@ purple_block = pygame.image.load("pngs/tetblock6.png").convert()
 turq_block = pygame.image.load("pngs/tetblock7.png").convert()
 
 block_colours = [brown_block,
-				beige_block,
-				blue_block,
-				red_block,
-				green_block,
-				turq_block,
-				purple_block ]
+		beige_block,
+		blue_block,
+		red_block,
+		green_block,
+		turq_block,
+		purple_block ]
 
 
 score = 0
@@ -258,7 +205,7 @@ while running == True:
 					active_block.move(0,32)
 			
 	screen.blit(background, (350,50))
-	#screen.blit(g_block,(510,594))
+
 	if clock % speed == 2:
 		if active_block.y < 594:
 			active_block.move(0,32)
