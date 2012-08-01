@@ -87,6 +87,8 @@ class Shape(object):
 	def __init__(self, x, y, shape):
 		self.x = x
 		self.y = y
+		self.absolutex = x
+		self.absolutey = y
 		rot = 0
 		self.rot = rot
 		self.shape = shape
@@ -103,6 +105,10 @@ class Shape(object):
 	def move(self, x, y):
 		self.x += x
 		self.y += y
+		self.absolutex =self.x
+		self.absolutey = self.y
+
+
 		for block in self.blocks:
 			block.x += x
 			block.y += y
@@ -134,14 +140,14 @@ class Shape(object):
 		if self.rot > 3:
 			self.rot = 0
 
-		self.blocks[0].x += shape_index[self.shape][self.rot][0][0]
-		self.blocks[0].y += shape_index[self.shape][self.rot][1][0]
-		self.blocks[0].x += shape_index[self.shape][self.rot][0][1]
-		self.blocks[0].y += shape_index[self.shape][self.rot][1][1]
-		self.blocks[0].x += shape_index[self.shape][self.rot][0][2]
-		self.blocks[0].y += shape_index[self.shape][self.rot][1][2]
-		self.blocks[0].x += shape_index[self.shape][self.rot][0][3]
-		self.blocks[0].y += shape_index[self.shape][self.rot][1][3]
+		self.blocks[0].x = self.absolutex + shape_index[self.shape][self.rot][0][0]
+		self.blocks[0].y = self.absolutey + shape_index[self.shape][self.rot][1][0]
+		self.blocks[0].x = self.absolutex + shape_index[self.shape][self.rot][0][1]
+		self.blocks[0].y = self.absolutey + shape_index[self.shape][self.rot][1][1]
+		self.blocks[0].x = self.absolutex + shape_index[self.shape][self.rot][0][2]
+		self.blocks[0].y = self.absolutey + shape_index[self.shape][self.rot][1][2]
+		self.blocks[0].x = self.absolutex + shape_index[self.shape][self.rot][0][3]
+		self.blocks[0].y = self.absolutey + shape_index[self.shape][self.rot][1][3]
 
 
 
