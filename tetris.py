@@ -63,14 +63,14 @@ shape_index = [
 	       	  [ [0,32,32,64],[-32,-32,0,0] ],
 	       	  [ [32,0,32,0],[-64,-32,-32,0] ],
 	       	  [ [0,32,32,64],[-32,-32,0,0] ],
-	       	  [ [32,0,32,0],[-64,-32,-32,0] ] ]
+	       	  [ [32,0,32,0],[-64,-32,-32,0] ] 
 	       ],
-	       
+
 	       [
 	       	  [ [0,32,64,96],[0,0,0,0] ],
 	       	  [ [32,32,32,32],[-96,-64,-32,0] ],
 	       	  [ [0,32,64,96],[0,0,0,0] ],
-	       	  [ [32,32,32,32],[-96,-64,-32,0] ] ]
+	       	  [ [32,32,32,32],[-96,-64,-32,0] ] 
 	       ],
 	       
 	       [
@@ -83,59 +83,20 @@ shape_index = [
 
 
 class Shape(object):
+	global shape_index
 	def __init__(self, x, y, shape):
 		self.x = x
 		self.y = y
-		self.rot = 0
+		rot = 0
+		self.rot = rot
+		self.shape = shape
 
-		if shape == 1:
-			self.blocks = [
-				Block(x,y,shape),
-				Block(x+32,y,shape),
-				Block(x,y-32,shape),
-				Block(x+32,y-32,shape)]
-
-		elif shape ==2:
-			self.blocks = [
-				Block(x-32,y,shape),
-				Block(x,y,shape),
-				Block(x+32,y,shape),
-				Block(x+64,y,shape)]
-
-		elif shape ==3:
-			self.blocks = [
-				Block(x,y-32,shape),
-				Block(x+32,y-32,shape),
-				Block(x+64,y-32,shape),
-				Block(x+64,y,shape)]
-
-		elif shape ==4:
-			self.blocks = [
-				Block(x,y-32,shape),
-				Block(x+32,y-32,shape),
-				Block(x+64,y-32,shape),
-				Block(x,y,shape)]
 		
-		elif shape ==5:
-			self.blocks = [
-				Block(x,y-32,shape),
-				Block(x+32,y-32,shape),
-				Block(x+64,y-32,shape),
-				Block(x+32,y,shape)]
-
-		elif shape ==6:
-			self.blocks = [
-				Block(x+32,y,shape),
-				Block(x+64,y,shape),
-				Block(x,y-32,shape),
-				Block(x+32,y-32,shape)]
-
-		else:
-			self.blocks = [
-				Block(x+32,y-32,shape),
-				Block(x+64,y-32,shape),
-				Block(x,y,shape),
-				Block(x+32,y,shape)]
+		self.blocks = [
+			Block(x+shape_index[shape][rot][0][0],y+shape_index[shape][rot][1][0],shape),
+			Block(x+shape_index[shape][rot][0][1],y+shape_index[shape][rot][1][1],shape),
+			Block(x+shape_index[shape][rot][0][2],y+shape_index[shape][rot][1][2],shape),
+			Block(x+shape_index[shape][rot][0][3],y+shape_index[shape][rot][1][3],shape)]
 
 
 
@@ -173,7 +134,15 @@ class Shape(object):
 		if self.rot > 3:
 			self.rot = 0
 
-		if self.shape == 1:
+		self.blocks[0].x += shape_index[self.shape][self.rot][0][0]
+		self.blocks[0].y += shape_index[self.shape][self.rot][1][0]
+		self.blocks[0].x += shape_index[self.shape][self.rot][0][1]
+		self.blocks[0].y += shape_index[self.shape][self.rot][1][1]
+		self.blocks[0].x += shape_index[self.shape][self.rot][0][2]
+		self.blocks[0].y += shape_index[self.shape][self.rot][1][2]
+		self.blocks[0].x += shape_index[self.shape][self.rot][0][3]
+		self.blocks[0].y += shape_index[self.shape][self.rot][1][3]
+
 
 
 def new_shape():
@@ -181,6 +150,7 @@ def new_shape():
 	global next_shape
 	global next_shape_number
 	for block in active_block.blocks:
+		pass
 
 	active_block.delete()
 	active_block = Shape(510,82,next_shape_number)
@@ -226,7 +196,7 @@ y_count = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0] # list of number of blocks in each
 
 pygame.init()
 
-screen=pygame.display.set_mode((1500,800),FULLSCREEN)
+screen=pygame.display.set_mode((1000,800),FULLSCREEN)
 
 background = pygame.image.load(bg_image).convert()
 brown_block = pygame.image.load("pngs/tetblock1.png").convert()
