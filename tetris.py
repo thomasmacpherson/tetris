@@ -87,6 +87,13 @@ class Shape(object):
 		if self.rot > 3:
 			self.rot = 0
 
+		for i, block in enumerate(self.blocks):
+			temp_blocks = [ [self.blocks[0].x,self.blocks[0].y],
+					[self.blocks[1].x,self.blocks[1].y],
+					[self.blocks[2].x,self.blocks[2].y],
+					[self.blocks[3].x,self.blocks[3].y] ]
+
+
 		self.blocks[0].x = self.x + shape_index[self.shape][self.rot][0][0]
 		self.blocks[0].y = self.y + shape_index[self.shape][self.rot][1][0]
 		self.blocks[1].x = self.x + shape_index[self.shape][self.rot][0][1]
@@ -97,15 +104,11 @@ class Shape(object):
 		self.blocks[3].y = self.y + shape_index[self.shape][self.rot][1][3]
 
 		if check_collision():
+			print "Rotation collision"
 			self.rot = previous_rot
-			self.blocks[0].x = self.x + shape_index[self.shape][self.rot][0][0]
-			self.blocks[0].y = self.y + shape_index[self.shape][self.rot][1][0]
-			self.blocks[1].x = self.x + shape_index[self.shape][self.rot][0][1]
-			self.blocks[1].y = self.y + shape_index[self.shape][self.rot][1][1]
-			self.blocks[2].x = self.x + shape_index[self.shape][self.rot][0][2]
-			self.blocks[2].y = self.y + shape_index[self.shape][self.rot][1][2]
-			self.blocks[3].x = self.x + shape_index[self.shape][self.rot][0][3]
-			self.blocks[3].y = self.y + shape_index[self.shape][self.rot][1][3]
+			for i, block in enumerate(self.blocks):
+				self.blocks[i].x = temp_blocks[i][0]
+				self.blocks[i].y = temp_blocks[i][1]
 
 
 
@@ -120,10 +123,16 @@ def new_shape():
 		pass
 
 	active_block.delete()
-	active_block = Shape(scr_pos_x + 510,scr_pos_y + 18,next_shape_number)
+	active_block = Shape(scr_pos_x + 606,scr_pos_y + 18,next_shape_number)
 	next_shape_number = random.randint(0,6)
-	next_shape = Shape(scr_pos_x +950, scr_pos_y + 215, next_shape_number)
+	
+	while next_shape_number == active_block.shape:	# don't get the same block twice in a row
+		next_shape_number = random.randint(0,6)
 
+	if next_shape_number == 5:	# next shape box adjustment for line piece
+		next_shape = Shape(scr_pos_x + 926, scr_pos_y + 192, next_shape_number)
+	else:
+		next_shape = Shape(scr_pos_x + 950, scr_pos_y + 215, next_shape_number)
 
 
 def check_collision():
@@ -138,16 +147,22 @@ def check_collision():
 
 def check_lines():
 	global dead_block_list
+	global y_count
 	check_list = list()
 
 	for block in dead_block_list[-4:]: # check last 4 blocks of list
 		if block.y not in check_list:
 			check_list.append(block.y)
 	check_list.sort()
+	check_list.reverse()
+	print check_list
+	removed_line_count = 0
 
 	for y in check_list:
-		check_line((y - 82)/32)
+		if check_line((y+(32*removed_line_count) - 82)/32):
+			removed_line_count += 1
 
+	print "Removed line count: %d" %removed_line_count
 
 
 def check_line(line_number):
@@ -157,21 +172,49 @@ def check_line(line_number):
 	global score
 	global level
 	global lines
+	global y_count
 
+	print "Line number: %d" %line_number
 	if y_count[line_number] > 9:
-		y_count[line_number] = 0
+		#y_count[line_number] = 0
 		lines += 1
 		score += level*10
 		
 		if lines %10 == 0:
 			level += 1
+
 		dead_block_list = [block for block in dead_block_list if block.y != (line_number * 32)+82]
+
+		for i in reversed(range(1,line_number+1)):
+			y_count[i] = y_count[i-1]
+
+			
+		for block in dead_block_list:		
+			if block.y < (line_number*32)+82:
+				block.y += 32
+		y_count[0] = 0
+		
 		return True
+
+	else:
+		return False
+
+
+
+
+
+
 """
 		for block in dead_block_list:
 			if block.y == (line_number * 32)+82:
 				dead_block_list.remove(block)
 """				
+
+
+
+
+
+
 
 def draw_black_box():
 	pygame.draw.rect(screen,(0,0,0), (scr_pos_x +450, scr_pos_y-50,600,100),0)
@@ -211,11 +254,14 @@ level = 1
 clock = 0
 speed = 15
 
-active_block = Shape(scr_pos_x + 510,scr_pos_y + 82, random.randint(0,6))
+active_block = Shape(scr_pos_x + 606,scr_pos_y + 82, random.randint(0,6))
 next_shape_number = random.randint(0,6)
 
-if next_shape_number == 5: # TODO: fix this for correct line piece 
-	next_shape = Shape(scr_pos_x + 915, scr_pos_y + 180, next_shape_number)
+while next_shape_number == active_block.shape:
+	next_shape_number = random.randint(0,6)
+
+if next_shape_number == 5:
+	next_shape = Shape(scr_pos_x + 926, scr_pos_y + 192, next_shape_number)
 else:
 	next_shape = Shape(scr_pos_x + 950, scr_pos_y + 215, next_shape_number)
 time.sleep(2)
@@ -246,7 +292,7 @@ while running == True:
 						new_shape()
 
 			elif event.key == K_SPACE:
-				for x in range(1,16):
+				for x in range(1,17):
 					if active_block.y < (scr_pos_y + 594):
 						if active_block.move(0,32):
 							break
@@ -255,7 +301,7 @@ while running == True:
 
 	screen.blit(background, (scr_pos_x + 350,scr_pos_y + 50))
 
-	if clock % speed == 2:
+	if clock % (speed/level) == 2:
 		if active_block.y < 594:
 			if active_block.move(0,32):
 				new_shape()
