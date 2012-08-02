@@ -92,6 +92,7 @@ class Shape(object):
 		del(self)
 	
 	def rotate(self):
+		global active_block
 		previous_rot = self.rot
 		self.rot +=1
 		if self.rot > 3:
@@ -104,14 +105,14 @@ class Shape(object):
 					[self.blocks[3].x,self.blocks[3].y] ]
 
 
-		self.blocks[0].x = self.x + shape_index[self.shape][self.rot][0][0]
-		self.blocks[0].y = self.y + shape_index[self.shape][self.rot][1][0]
-		self.blocks[1].x = self.x + shape_index[self.shape][self.rot][0][1]
-		self.blocks[1].y = self.y + shape_index[self.shape][self.rot][1][1]
-		self.blocks[2].x = self.x + shape_index[self.shape][self.rot][0][2]
-		self.blocks[2].y = self.y + shape_index[self.shape][self.rot][1][2]
-		self.blocks[3].x = self.x + shape_index[self.shape][self.rot][0][3]
-		self.blocks[3].y = self.y + shape_index[self.shape][self.rot][1][3]
+		self.blocks[0].x = active_block.x + shape_index[active_block.shape][active_block.rot][0][0]
+		self.blocks[0].y = active_block.y + shape_index[active_block.shape][active_block.rot][1][0]
+		self.blocks[1].x = active_block.x + shape_index[active_block.shape][active_block.rot][0][1]
+		self.blocks[1].y = active_block.y + shape_index[active_block.shape][active_block.rot][1][1]
+		self.blocks[2].x = active_block.x + shape_index[active_block.shape][active_block.rot][0][2]
+		self.blocks[2].y = active_block.y + shape_index[active_block.shape][active_block.rot][1][2]
+		self.blocks[3].x = active_block.x + shape_index[active_block.shape][active_block.rot][0][3]
+		self.blocks[3].y = active_block.y + shape_index[active_block.shape][active_block.rot][1][3]
 
 		if check_collision():
 			#print "Rotation collision"
@@ -328,10 +329,15 @@ while running == True:
 
 			elif event.key == K_LEFT:# and active_block.x >510:
 				active_block.move(-32,0)
+				shadow_block.move(-32,0)
 
 			elif event.key == K_UP:
 				active_block.rotate()
-
+				shadow_block.rotate()
+				for x in range(1,20):
+					if shadow_block.y < (scr_pos_y + 594):
+						if shadow_block.move(0,32):
+							break
 			elif event.key == K_DOWN:
 				if active_block.y < 594:
 					if active_block.move(0,32):
