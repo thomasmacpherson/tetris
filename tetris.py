@@ -4,12 +4,15 @@ from shapes import *
 bg_image = "background.png"
 
 
-
+scr_pos_x = -200
+scr_pos_y = 0
 
 import pygame, time, sys, threading, random
-import piface.pfio as pfio
+#import piface.pfio as pfio
 
 from pygame.locals import *
+pygame.init()
+font = pygame.font.Font(None, 60)
 
 
 class Block(object):
@@ -60,7 +63,8 @@ class Shape(object):
 				block.x -= x
 				block.y -= y
 			if y != 0:
-				new_shape()
+				return True # new shape needed
+			#	new_shape()
 
 
 	def draw(self):
@@ -78,19 +82,30 @@ class Shape(object):
 		del(self)
 	
 	def rotate(self):
+		previous_rot = self.rot
 		self.rot +=1
 		if self.rot > 3:
 			self.rot = 0
 
-		self.blocks[0].x = self.absolutex + shape_index[self.shape][self.rot][0][0]
-		self.blocks[0].y = self.absolutey + shape_index[self.shape][self.rot][1][0]
-		self.blocks[0].x = self.absolutex + shape_index[self.shape][self.rot][0][1]
-		self.blocks[0].y = self.absolutey + shape_index[self.shape][self.rot][1][1]
-		self.blocks[0].x = self.absolutex + shape_index[self.shape][self.rot][0][2]
-		self.blocks[0].y = self.absolutey + shape_index[self.shape][self.rot][1][2]
-		self.blocks[0].x = self.absolutex + shape_index[self.shape][self.rot][0][3]
-		self.blocks[0].y = self.absolutey + shape_index[self.shape][self.rot][1][3]
+		self.blocks[0].x = self.x + shape_index[self.shape][self.rot][0][0]
+		self.blocks[0].y = self.y + shape_index[self.shape][self.rot][1][0]
+		self.blocks[1].x = self.x + shape_index[self.shape][self.rot][0][1]
+		self.blocks[1].y = self.y + shape_index[self.shape][self.rot][1][1]
+		self.blocks[2].x = self.x + shape_index[self.shape][self.rot][0][2]
+		self.blocks[2].y = self.y + shape_index[self.shape][self.rot][1][2]
+		self.blocks[3].x = self.x + shape_index[self.shape][self.rot][0][3]
+		self.blocks[3].y = self.y + shape_index[self.shape][self.rot][1][3]
 
+		if check_collision():
+			self.rot = previous_rot
+			self.blocks[0].x = self.x + shape_index[self.shape][self.rot][0][0]
+			self.blocks[0].y = self.y + shape_index[self.shape][self.rot][1][0]
+			self.blocks[1].x = self.x + shape_index[self.shape][self.rot][0][1]
+			self.blocks[1].y = self.y + shape_index[self.shape][self.rot][1][1]
+			self.blocks[2].x = self.x + shape_index[self.shape][self.rot][0][2]
+			self.blocks[2].y = self.y + shape_index[self.shape][self.rot][1][2]
+			self.blocks[3].x = self.x + shape_index[self.shape][self.rot][0][3]
+			self.blocks[3].y = self.y + shape_index[self.shape][self.rot][1][3]
 
 
 
@@ -105,14 +120,16 @@ def new_shape():
 		pass
 
 	active_block.delete()
-	active_block = Shape(510,82,next_shape_number)
+	active_block = Shape(scr_pos_x + 510,scr_pos_y + 18,next_shape_number)
 	next_shape_number = random.randint(0,6)
-	next_shape = Shape(950, 215, next_shape_number)
+	next_shape = Shape(scr_pos_x +950, scr_pos_y + 215, next_shape_number)
 
 
 
 def check_collision():
 	for block in active_block.blocks:
+		if block.x > (scr_pos_x + 798) or block.x < (scr_pos_x + 510):
+			return True
 		for dead_block in dead_block_list:
 			if block.x == dead_block.x and block.y == dead_block.y:
 				return True
@@ -126,6 +143,7 @@ def check_lines():
 	for block in dead_block_list[-4:]: # check last 4 blocks of list
 		if block.y not in check_list:
 			check_list.append(block.y)
+	check_list.sort()
 
 	for y in check_list:
 		check_line((y - 82)/32)
@@ -135,11 +153,28 @@ def check_lines():
 def check_line(line_number):
 	print line_number
 	global dead_block_list
+
+	global score
+	global level
+	global lines
+
 	if y_count[line_number] > 9:
+		y_count[line_number] = 0
+		lines += 1
+		score += level*10
+		
+		if lines %10 == 0:
+			level += 1
+		dead_block_list = [block for block in dead_block_list if block.y != (line_number * 32)+82]
+		return True
+"""
 		for block in dead_block_list:
 			if block.y == (line_number * 32)+82:
 				dead_block_list.remove(block)
-				
+"""				
+
+def draw_black_box():
+	pygame.draw.rect(screen,(0,0,0), (scr_pos_x +450, scr_pos_y-50,600,100),0)
 
 
 dead_block_list = list() # list of deadblocks for displaying and detecting collisions
@@ -170,15 +205,20 @@ block_colours = [brown_block,
 
 
 score = 0
+lines = 0
+level = 1
 
 clock = 0
-speed = 150
+speed = 15
 
-active_block = Shape(510,82, random.randint(0,6))
+active_block = Shape(scr_pos_x + 510,scr_pos_y + 82, random.randint(0,6))
 next_shape_number = random.randint(0,6)
-next_shape = Shape(950, 215, next_shape_number)
 
-time.sleep(4)
+if next_shape_number == 5: # TODO: fix this for correct line piece 
+	next_shape = Shape(scr_pos_x + 915, scr_pos_y + 180, next_shape_number)
+else:
+	next_shape = Shape(scr_pos_x + 950, scr_pos_y + 215, next_shape_number)
+time.sleep(2)
 
 running = True
 
@@ -191,10 +231,10 @@ while running == True:
 			if event.key == K_ESCAPE:
 				running = False
 
-			elif event.key == K_RIGHT and active_block.x <766:
+			elif event.key == K_RIGHT:# and active_block.x <766:
 				active_block.move(32,0)
 
-			elif event.key == K_LEFT and active_block.x >510:
+			elif event.key == K_LEFT:# and active_block.x >510:
 				active_block.move(-32,0)
 
 			elif event.key == K_UP:
@@ -202,13 +242,23 @@ while running == True:
 
 			elif event.key == K_DOWN:
 				if active_block.y < 594:
-					active_block.move(0,32)
-			
-	screen.blit(background, (350,50))
+					if active_block.move(0,32):
+						new_shape()
+
+			elif event.key == K_SPACE:
+				for x in range(1,16):
+					if active_block.y < (scr_pos_y + 594):
+						if active_block.move(0,32):
+							break
+				new_shape()
+
+
+	screen.blit(background, (scr_pos_x + 350,scr_pos_y + 50))
 
 	if clock % speed == 2:
 		if active_block.y < 594:
-			active_block.move(0,32)
+			if active_block.move(0,32):
+				new_shape()
 		else:
 			new_shape()
 
@@ -218,11 +268,18 @@ while running == True:
 	for block in dead_block_list:
 		block.draw()
 	
+	display_score = font.render(str(score), 1, (0,0,0))
+	display_lines = font.render(str(lines), 1, (0,0,0))
+	display_level = font.render(str(level), 1, (0,0,0))
 
+	screen.blit(display_score, (1030 + scr_pos_x, 358 + scr_pos_y))
+	screen.blit(display_level, (1030 + scr_pos_x, 456 + scr_pos_y))
+	screen.blit(display_lines, (1030 + scr_pos_x, 550 + scr_pos_y))
+
+	draw_black_box()
 	pygame.display.update()
 	clock +=1
-	
-	
+
 
 exit()
 
