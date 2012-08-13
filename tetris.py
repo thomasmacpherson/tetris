@@ -217,7 +217,7 @@ def check_line(line_number):
 			level += 1
 		for block in dead_block_list:
 			if block.y == (line_number*32)+82:
-				block.colour = 7
+				block.colour +=8 
 		draw_screen(False)
 		time.sleep(0.2)
 
@@ -304,6 +304,13 @@ green_block = pygame.image.load("pngs/tetblock5.png").convert()
 purple_block = pygame.image.load("pngs/tetblock6.png").convert()
 turq_block = pygame.image.load("pngs/tetblock7.png").convert()
 clear_block = pygame.image.load("pngs/tetblockclear.png").convert()
+dead_brown_block = pygame.image.load("pngs/tetblock1dead.png").convert()
+dead_beige_block = pygame.image.load("pngs/tetblock2dead.png").convert()
+dead_blue_block = pygame.image.load("pngs/tetblock3dead.png").convert()
+dead_red_block = pygame.image.load("pngs/tetblock4dead.png").convert()
+dead_green_block = pygame.image.load("pngs/tetblock5dead.png").convert()
+dead_purple_block = pygame.image.load("pngs/tetblock6dead.png").convert()
+dead_turq_block = pygame.image.load("pngs/tetblock7dead.png").convert()
 
 image1 = pygame.image.load("pngs/sacktetris.png").convert()
 image2 = pygame.image.load("pngs/placetetris.png").convert()
@@ -316,7 +323,14 @@ block_colours = [brown_block,
 		green_block,
 		turq_block,
 		purple_block,
-		clear_block ]
+		clear_block,
+		dead_brown_block,
+		dead_beige_block,
+		dead_blue_block,
+		dead_red_block,
+		dead_green_block,
+		dead_turq_block,
+		dead_purple_block]
 
 background_images = [ 	image1,
 			image2,
