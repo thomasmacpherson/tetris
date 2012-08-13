@@ -66,7 +66,7 @@ class Shape(object):
 			block.y += y
 
 
-		if check_collision():
+		if check_collision(self):
 			for block in self.blocks:
 				block.x -= x
 				block.y -= y
@@ -76,6 +76,10 @@ class Shape(object):
 			#	new_shape()
 		else:
 			return False
+	
+	def position(self, x, y):
+		pass
+
 
 	def draw(self):
 		for block in self.blocks:
@@ -114,7 +118,7 @@ class Shape(object):
 		self.blocks[3].x = active_block.x + shape_index[active_block.shape][active_block.rot][0][3]
 		self.blocks[3].y = active_block.y + shape_index[active_block.shape][active_block.rot][1][3]
 
-		if check_collision():
+		if check_collision(self):
 			#print "Rotation collision"
 			self.rot = previous_rot
 			for i, block in enumerate(self.blocks):
@@ -158,8 +162,8 @@ def new_shape():
 
 
 
-def check_collision():
-	for block in active_block.blocks:
+def check_collision(shape):
+	for block in shape.blocks:
 		if block.x > (scr_pos_x + 798) or block.x < (scr_pos_x + 510):
 			return True
 		for dead_block in dead_block_list:
@@ -252,7 +256,7 @@ y_count = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0] # list of number of blocks in each
 
 pygame.init()
 
-screen=pygame.display.set_mode((1000,800),FULLSCREEN)
+screen=pygame.display.set_mode((1000,800))
 
 background = pygame.image.load(bg_image).convert()
 brown_block = pygame.image.load("pngs/tetblock1.png").convert()
