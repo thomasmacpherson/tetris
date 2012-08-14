@@ -8,7 +8,8 @@ scr_pos_y = 0
 in_play = True
 
 import pygame, time, sys, threading, random
-#import piface.pfio as pfio
+import piface.pfio as pfio
+pfio.init()
 
 from pygame.locals import *
 pygame.init()
@@ -209,7 +210,7 @@ def check_line(line_number):
 			if block.y == (line_number*32)+18:
 				block.colour +=8 
 		draw_screen(False)
-		time.sleep(0.2)
+		time.sleep(0.1)
 
 		dead_block_list = [block for block in dead_block_list if block.y != (line_number * 32)+18]
 
@@ -280,6 +281,41 @@ def game_over():
 	in_play = False
 	draw_screen(True)
 	exit()
+
+def move_right():
+	active_block.move(32,0)
+	shadow_block.position()
+	for x in range(1,20):
+		if shadow_block.y < (scr_pos_y + 594):
+			if shadow_block.move(0,32):
+				break
+
+def move_left():	
+	active_block.move(-32,0)
+	shadow_block.position()
+	for x in range(1,20):
+		if shadow_block.y < (scr_pos_y + 594):
+			if shadow_block.move(0,32):
+				break
+
+def rotate_piece():
+	active_block.rotate()
+	shadow_block.position()
+	for x in range(1,20):
+		if shadow_block.y < (scr_pos_y + 594):
+			if shadow_block.move(0,32):
+				break
+
+def move_down():
+	if active_block.y < 594:
+		if active_block.move(0,32):
+			new_shape()
+
+def drop_down():
+	for x in range(1,18):
+		if active_block.y < (scr_pos_y + 594):
+			if active_block.move(0,32):
+				break
 
 dead_block_list = list() # list of deadblocks for displaying and detecting collisions
 
@@ -366,51 +402,61 @@ time.sleep(2)
 
 running = True
 
+keyboard = True
+
 while running == True:
-	for event in pygame.event.get():
-		if event.type == QUIT:
-			pygame.quit()
-			sys.exit()
-		if event.type == KEYDOWN:
-			if event.key == K_ESCAPE:
-				running = False
+	if keyboard == True:
+		for event in pygame.event.get():
+			if event.type == QUIT:
+				pygame.quit()
+				sys.exit()
+			if event.type == KEYDOWN:
+				if event.key == K_ESCAPE:
+					running = False
 
-			elif event.key == K_RIGHT:# and active_block.x <766:
-				active_block.move(32,0)
-				shadow_block.position()
-				for x in range(1,20):
-					if shadow_block.y < (scr_pos_y + 594):
-						if shadow_block.move(0,32):
-							break
-			elif event.key == K_LEFT:# and active_block.x >510:
-				active_block.move(-32,0)
-				shadow_block.position()
-				for x in range(1,20):
-					if shadow_block.y < (scr_pos_y + 594):
-						if shadow_block.move(0,32):
-							break
-			elif event.key == K_UP:
-				active_block.rotate()
-				shadow_block.position()
-				for x in range(1,20):
-					if shadow_block.y < (scr_pos_y + 594):
-						if shadow_block.move(0,32):
-							break
-			elif event.key == K_DOWN:
-				if active_block.y < 594:
-					if active_block.move(0,32):
-						new_shape()
-			elif event.key == K_SPACE:
-				for x in range(1,18):
-					if active_block.y < (scr_pos_y + 594):
-						if active_block.move(0,32):
-							break
-				new_shape()
-			elif event.key == K_s:
+				elif event.key == K_p:
+					keyboard = False
+
+				elif event.key == K_RIGHT:# and active_block.x <766:
+					move_right()
+
+				elif event.key == K_LEFT:# and active_block.x >510:
+					move_left()
+
+				elif event.key == K_UP:
+					rotate_piece()
+				elif event.key == K_DOWN:
+					move_down()
+				elif event.key == K_SPACE:
+					drop_down()
+					new_shape()
+				elif event.key == K_s:
+					shadow = not shadow
+
+				elif event.key == K_h:
+					next_shape_help = not next_shape_help
+	else:
+		if clock % 5 == 1:
+			if pfio.digital_read(7):
 				shadow = not shadow
+		if clock % 3 == 1:
 
-			elif event.key == K_h:
-				next_shape_help = not next_shape_help
+			if pfio.digital_read(5):
+				drop_down()
+			elif pfio.digital_read(3):
+				rotate_piece()
+		else:
+			if pfio.digital_read(1):
+				move_left()
+			elif pfio.digital_read(2):
+				move_right()
+
+
+			if pfio.digital_read(4):
+				move_down()
+
+		if pfio.digital_read(6):
+			keyboard = True
 
 	current_speed = speed/level
 	if current_speed < 3:
