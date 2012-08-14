@@ -3,8 +3,13 @@
 from shapes import *
 from math import log10
 import socket
-UDP_IP="10.0.0.209"
-UDP_PORT = 5005
+
+REMOTE_UDP_IP="10.0.0.209"
+REMOTE_UDP_PORT = 5005
+
+LOCAL_UDP_IP ="10.0.0.203"
+LOCAL_UDP_PORT = 4052
+
 
 scr_pos_x = -200
 scr_pos_y = 0
@@ -18,7 +23,8 @@ from pygame.locals import *
 pygame.init()
 font = pygame.font.Font(None, 60)
 big_font = pygame.font.Font(None, 400)
-
+data = 4
+addr = 0
 
 
 class Block(object):
@@ -236,12 +242,18 @@ def check_line(line_number):
 def add_lines(number_of_lines):
 	for i in range(0,18):
 		y_count[i] = y_count[i+1]
-	y_count[18] = 0
 
 	for block in dead_block_list:
 		block.y -= 32*number_of_lines
 
+	for i in range(18-number_of_lines,18):
+		y_count[i] = 0
+		for j in range(1,11):
+			dead_block_list.append(Block(j*32+xoffset,i*32+yoffset,7)) # draw in lines
 
+
+
+	
 
 
 def draw_screen(shadow):
@@ -293,6 +305,7 @@ def game_over():
 	global score
 	global in_play
 	print "Your score was %d" %score
+	send_message("You win")
 	in_play = False
 	draw_screen(True)
 	exit()
@@ -327,23 +340,32 @@ def move_down():
 			new_shape()
 
 def drop_down():
-	for x in range(1,18):
+	for x in range(1,19):
 		if active_block.y < (scr_pos_y + 594):
 			if active_block.move(0,32):
 				break
 
 def send_message(message):
-	global UDP_IP
-	global UDP_PORT
+	global REMOTE_UDP_IP
+	global REMOTE_UDP_PORT
 	MESSAGE= message
 
-	#print "UDP target IP:", UDP_IP
-	#print "UDP target port:", UDP_PORT
-	print "message:", MESSAGE
+	#print "UDP target IP:", REMOTE_UDP_IP
+	#print "UDP target port:", REMOTE_UDP_PORT
+	print "message sent:", MESSAGE
 
 	sock = socket.socket(socket.AF_INET,
 			     socket.SOCK_DGRAM)
-	sock.sendto(MESSAGE, (UDP_IP, UDP_PORT))
+	sock.sendto(MESSAGE, (REMOTE_UDP_IP, REMOTE_UDP_PORT))
+
+
+def listener():
+	global data
+	global addr
+	while True:
+		data, addr = sock2.recvfrom(1024)
+
+
 
 
 dead_block_list = list() # list of deadblocks for displaying and detecting collisions
@@ -408,7 +430,7 @@ next_shape_help = True
 active_block = Shape(scr_pos_x + 606,scr_pos_y + 82, random.randint(0,6))
 
 shadow_block = Shape(scr_pos_x + 606,scr_pos_y + 82, 7)
-#shadow_block.position()
+
 
 for x in range(1,20):
 	if shadow_block.y < (scr_pos_y + 594):
@@ -429,20 +451,21 @@ else:
 
 sock2 = socket.socket(socket.AF_INET,
 			socket.SOCK_DGRAM)
-sock2.bind((UDP_IP,UDP_PORT))
+sock2.bind((LOCAL_UDP_IP,LOCAL_UDP_PORT))
 time.sleep(2)
 
 running = True
 
 keyboard = True
 
-
+t = threading.Thread(target=listener)
+t.start
 
 
 while running == True:
-	data, addr = sock.recvfrom(1024)
-	if data:
-		print data
+	if data != 4:
+		add_lines(int(data))
+		data = 4
 		
 	if keyboard == True:
 		for event in pygame.event.get():
