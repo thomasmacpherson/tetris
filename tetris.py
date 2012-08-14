@@ -2,6 +2,9 @@
 
 from shapes import *
 from math import log10
+import socket
+UDP_IP="10.0.0.209"
+UDP_PORT = 5005
 
 scr_pos_x = -200
 scr_pos_y = 0
@@ -187,7 +190,8 @@ def check_lines():
 		if check_line((y+(32*removed_line_count) - 18)/32):
 			removed_list
 			removed_line_count += 1
-
+	if removed_line_count > 1:
+		send_message(str(removed_line_count-1))
 
 def check_line(line_number):
 
@@ -226,6 +230,17 @@ def check_line(line_number):
 		return True
 	else:
 		return False
+
+
+
+def add_lines(number_of_lines):
+	for i in range(0,18):
+		y_count[i] = y_count[i+1]
+	y_count[18] = 0
+
+	for block in dead_block_list:
+		block.y -= 32*number_of_lines
+
 
 
 
@@ -317,6 +332,20 @@ def drop_down():
 			if active_block.move(0,32):
 				break
 
+def send_message(message):
+	global UDP_IP
+	global UDP_PORT
+	MESSAGE= message
+
+	#print "UDP target IP:", UDP_IP
+	#print "UDP target port:", UDP_PORT
+	print "message:", MESSAGE
+
+	sock = socket.socket(socket.AF_INET,
+			     socket.SOCK_DGRAM)
+	sock.sendto(MESSAGE, (UDP_IP, UDP_PORT))
+
+
 dead_block_list = list() # list of deadblocks for displaying and detecting collisions
 
 y_count = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0] # list of number of blocks in each y position for full line detection
@@ -398,13 +427,23 @@ elif next_shape_number == 1:	# next shape box adjustment for square blocks
 else:
 	next_shape = Shape(scr_pos_x + 933, scr_pos_y + 253, next_shape_number)
 
+sock2 = socket.socket(socket.AF_INET,
+			socket.SOCK_DGRAM)
+sock2.bind((UDP_IP,UDP_PORT))
 time.sleep(2)
 
 running = True
 
 keyboard = True
 
+
+
+
 while running == True:
+	data, addr = sock.recvfrom(1024)
+	if data:
+		print data
+		
 	if keyboard == True:
 		for event in pygame.event.get():
 			if event.type == QUIT:
