@@ -257,7 +257,7 @@ def add_lines(number_of_lines):
 	for i in range(19-number_of_lines,19):
 		y_count[i] = 0
 		for j in range(1,11):
-			dead_block_list.append(Block(j*32+278,i*32+18,8)) # draw in lines
+			dead_block_list.append(Block(j*32+278,i*32+18,15)) # draw in lines
 
 	shadow_block.position()
 	for x in range(1,20):
@@ -410,6 +410,7 @@ dead_red_block = pygame.image.load("pngs/tetblock4dead.png").convert()
 dead_green_block = pygame.image.load("pngs/tetblock5dead.png").convert()
 dead_purple_block = pygame.image.load("pngs/tetblock6dead.png").convert()
 dead_turq_block = pygame.image.load("pngs/tetblock7dead.png").convert()
+net_block = pygame.image.load("pngs/tetnetblock.png").convert() # 15
 
 image1 = pygame.image.load("pngs/sacktetris.png").convert()
 image2 = pygame.image.load("pngs/placetetris.png").convert()
@@ -429,7 +430,8 @@ block_colours = [brown_block,
 		dead_red_block,
 		dead_green_block,
 		dead_turq_block,
-		dead_purple_block]
+		dead_purple_block
+		net_block]
 
 background_images = [ 	image1,
 			image2,
