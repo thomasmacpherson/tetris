@@ -4,11 +4,11 @@ from shapes import *
 from math import log10
 import socket
 
-REMOTE_UDP_IP="10.0.0.209"
-REMOTE_UDP_PORT = 5005
+REMOTE_UDP_IP="10.0.0.203"
+REMOTE_UDP_PORT = 4052
 
-LOCAL_UDP_IP ="10.0.0.203"
-LOCAL_UDP_PORT = 4052
+RECIEVING_UDP_IP ="10.0.0.209"
+RECIEVING_UDP_PORT = 5005
 
 
 scr_pos_x = -200
@@ -25,6 +25,12 @@ font = pygame.font.Font(None, 60)
 big_font = pygame.font.Font(None, 400)
 data = 4
 addr = 0
+
+
+sock2 = socket.socket(socket.AF_INET,
+			socket.SOCK_DGRAM)
+sock2.bind((RECIEVING_UDP_IP,RECIEVING_UDP_PORT))
+
 
 
 class Block(object):
@@ -240,17 +246,25 @@ def check_line(line_number):
 
 
 def add_lines(number_of_lines):
-	for i in range(0,18):
-		y_count[i] = y_count[i+1]
+	global shadow
+	for i in range(0,19-number_of_lines):
+		print i
+		y_count[i] = y_count[i+number_of_lines]
 
 	for block in dead_block_list:
 		block.y -= 32*number_of_lines
 
-	for i in range(18-number_of_lines,18):
+	for i in range(19-number_of_lines,19):
 		y_count[i] = 0
 		for j in range(1,11):
-			dead_block_list.append(Block(j*32+xoffset,i*32+yoffset,7)) # draw in lines
+			dead_block_list.append(Block(j*32+278,i*32+18,8)) # draw in lines
 
+	shadow_block.position()
+	for x in range(1,20):
+		if shadow_block.y < (scr_pos_y + 594):
+			if shadow_block.move(0,32):
+				break
+	draw_screen(shadow)
 
 
 	
@@ -305,7 +319,7 @@ def game_over():
 	global score
 	global in_play
 	print "Your score was %d" %score
-	send_message("You win")
+	#send_message("You win")
 	in_play = False
 	draw_screen(True)
 	exit()
@@ -348,6 +362,7 @@ def drop_down():
 def send_message(message):
 	global REMOTE_UDP_IP
 	global REMOTE_UDP_PORT
+	global sock
 	MESSAGE= message
 
 	#print "UDP target IP:", REMOTE_UDP_IP
@@ -362,8 +377,10 @@ def send_message(message):
 def listener():
 	global data
 	global addr
+	global sock2
 	while True:
 		data, addr = sock2.recvfrom(1024)
+		print "Lines received %s", data
 
 
 
@@ -449,9 +466,7 @@ elif next_shape_number == 1:	# next shape box adjustment for square blocks
 else:
 	next_shape = Shape(scr_pos_x + 933, scr_pos_y + 253, next_shape_number)
 
-sock2 = socket.socket(socket.AF_INET,
-			socket.SOCK_DGRAM)
-sock2.bind((LOCAL_UDP_IP,LOCAL_UDP_PORT))
+
 time.sleep(2)
 
 running = True
@@ -459,7 +474,7 @@ running = True
 keyboard = True
 
 t = threading.Thread(target=listener)
-t.start
+t.start()
 
 
 while running == True:
