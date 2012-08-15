@@ -3,12 +3,21 @@
 from shapes import *
 from math import log10
 import socket
+import sys
 
-REMOTE_UDP_IP="10.0.0.203"
-REMOTE_UDP_PORT = 4052
+networked = False
 
-RECIEVING_UDP_IP ="10.0.0.209"
-RECIEVING_UDP_PORT = 5005
+
+if len(sys.argv) == 2:
+	if sys.argv[1] == "1":
+		REMOTE_UDP_IP="192.168.1.2"  # default IP address for quick play
+	else:
+		REMOTE_UDP_IP = sys.argv[1]
+	REMOTE_UDP_PORT = 4052
+
+	RECIEVING_UDP_IP =socket.gethostbyname(socket.gethostname())
+	RECIEVING_UDP_PORT = 5005
+	networked = True
 
 
 scr_pos_x = -200
@@ -17,6 +26,7 @@ in_play = True
 
 import pygame, time, sys, threading, random
 import piface.pfio as pfio
+
 pfio.init()
 
 from pygame.locals import *
@@ -27,9 +37,10 @@ data = 4
 addr = 0
 
 
-sock2 = socket.socket(socket.AF_INET,
-			socket.SOCK_DGRAM)
-sock2.bind((RECIEVING_UDP_IP,RECIEVING_UDP_PORT))
+if networked:
+	sock2 = socket.socket(socket.AF_INET,
+				socket.SOCK_DGRAM)
+	sock2.bind((RECIEVING_UDP_IP,RECIEVING_UDP_PORT))
 
 
 
@@ -202,7 +213,7 @@ def check_lines():
 		if check_line((y+(32*removed_line_count) - 18)/32):
 			removed_list
 			removed_line_count += 1
-	if removed_line_count > 1:
+	if removed_line_count > 1 and networked:
 		send_message(str(removed_line_count-1))
 
 def check_line(line_number):
@@ -318,6 +329,7 @@ def draw_black_box():
 def game_over():
 	global score
 	global in_play
+	global t
 	print "Your score was %d" %score
 	#send_message("You win")
 	in_play = False
@@ -430,7 +442,7 @@ block_colours = [brown_block,
 		dead_red_block,
 		dead_green_block,
 		dead_turq_block,
-		dead_purple_block
+		dead_purple_block,
 		net_block]
 
 background_images = [ 	image1,
@@ -475,12 +487,14 @@ running = True
 
 keyboard = True
 
-t = threading.Thread(target=listener)
-t.start()
+if networked:
+	t = threading.Thread(target=listener)
+	t.daemon = True
+	t.start()
 
 
 while running == True:
-	if data != 4:
+	if data != 4 and networked:
 		add_lines(int(data))
 		data = 4
 		
